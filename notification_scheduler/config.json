@@ -1,0 +1,21 @@
+{
+  "app_name": "Py_Projects Scheduler",
+  "default_timeout": 10,
+  "notifications": [
+    {
+      "title": "Drink Water",
+      "message": "Staying hydrated is essential for productivity.",
+      "interval_seconds": 3600
+    },
+    {
+      "title": "Take a Break",
+      "message": "Regular breaks improve focus and reduce fatigue.",
+      "interval_seconds": 5400
+    },
+    {
+      "title": "Check Emails",
+      "message": "Stay on top of your communication.",
+      "interval_seconds": 1800
+    }
+  ]
+}

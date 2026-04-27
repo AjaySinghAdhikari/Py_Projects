@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+tasks.json
+todo_app/tasks.json
