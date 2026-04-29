@@ -42,3 +42,4 @@ python todo_app/main.py
 
 - Task data is stored locally in `tasks.json`.
 - If the file is deleted, the app will start with an empty task list.
+- Be specific about your goals.
