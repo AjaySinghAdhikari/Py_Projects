@@ -1,6 +1,6 @@
 # Py_Projects
 
-A collection of small Python projects.
+A collection of small Python projects.To improve the productivity of your day.
 
 ## Projects
 
