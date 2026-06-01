@@ -5,7 +5,7 @@ A collection of small Python projects.To improve the productivity of your day.
 ## Projects
 
 ### To-Do List App
-A simple command-line to-do list application with:
+A simple command-line to-do list application with easy steps
 - add task
 - list tasks
 - mark task as complete
