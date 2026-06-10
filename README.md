@@ -1,4 +1,4 @@
-# Py_Projects
+# Py_Projects(Python)
 
 A collection of small Python projects.To improve the productivity of your day.
 
