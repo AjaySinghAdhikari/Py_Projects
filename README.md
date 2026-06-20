@@ -1,45 +1,95 @@
-# Py_Projects(Python)
+# Py_Projects (Python)
 
-A collection of small Python projects.To improve the productivity of your day.
-
-## Projects
-
-### To-Do List App
-A simple command-line to-do list application with:
-- add task
-- list tasks
-- mark task as complete
-- delete task
-- JSON file persistence
+A collection of small Python utilities to improve daily productivity.
 
 ## Requirements
 
 - Python 3.10+
+- Install dependencies: `pip install -r requirements.txt`
 
-## How to Run
+---
 
-From the project root:
+## Projects
 
-```
-python "To-Do List App.py"
-```
+### 1. To-Do List App
 
-Or, if using the folder-based structure:
+A command-line to-do list with persistent JSON storage.
 
-```
+**Features:**
+- Add, list, edit, and delete tasks
+- Mark tasks as complete
+- Filter to show only open tasks
+- Tasks saved automatically to `tasks.json`
+
+**Run:**
+```bash
 python todo_app/main.py
 ```
 
+---
+
+### 2. Notification Scheduler
+
+Sends recurring desktop notifications on a configurable schedule.
+
+**Features:**
+- Fully driven by `notification_scheduler/config.json` — no code changes needed
+- Supports a set number of cycles or infinite mode
+- Graceful fallback if `plyer` is not installed (logs to console instead)
+
+**Run (one cycle):**
+```bash
+python notification_scheduler/main.py
+```
+
+**Run forever:**
+```bash
+python notification_scheduler/main.py --infinite
+```
+
+**Run 5 cycles:**
+```bash
+python notification_scheduler/main.py --cycles 5
+```
+
+**Use a custom config file:**
+```bash
+python notification_scheduler/main.py --config path/to/my_config.json
+```
+
+**Edit notifications** by modifying `notification_scheduler/config.json`:
+```json
+{
+  "app_name": "My Scheduler",
+  "default_timeout": 10,
+  "notifications": [
+    {
+      "title": "Drink Water",
+      "message": "Stay hydrated!",
+      "interval_seconds": 3600
+    }
+  ]
+}
+```
+
+---
+
 ## Files
 
-- `To-Do List App.py` — main to-do list application
-- `tasks.json` — created automatically to store saved tasks
-- `LICENSE` — project license
-- `requirements.txt` — dependencies, if any
-- `.gitignore` — ignored files for Git
+```
+Py_Projects/
+├── todo_app/
+│   └── main.py              # To-Do List app
+├── notification_scheduler/
+│   ├── main.py              # Notification scheduler
+│   └── config.json          # Edit this to change notifications
+├── requirements.txt
+├── .gitignore
+└── README.md
+```
 
 ## Notes
 
-- Task data is stored locally in `tasks.json`.
-- If the file is deleted, the app will start with an empty task list.
-- Be specific about your goals.
+- Task data is stored locally in `todo_app/tasks.json` (auto-created, git-ignored).
+- If `tasks.json` is deleted, the app starts with an empty list.
+- If `plyer` is unavailable, the scheduler prints notifications to the terminal instead.
