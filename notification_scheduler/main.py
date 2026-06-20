@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import sys
 import time
 from dataclasses import dataclass
@@ -10,9 +11,16 @@ from typing import Any
 
 try:
     from plyer import notification
-except ImportError:  # pragma: no cover - fallback path for local execution
+except ImportError:
     notification = None
 
+# FIX: use logging instead of bare print() so output can be redirected/controlled
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIG_PATH = Path(__file__).with_name("config.json")
 
@@ -69,7 +77,8 @@ def parse_notifications(config_data: dict[str, Any]) -> tuple[str, int, list[Not
 
 def send_notification(app_name: str, item: NotificationItem, timeout: int) -> None:
     if notification is None:
-        print(f"[{app_name}] {item.title}: {item.message}")
+        # FIX: use logger instead of print
+        logger.info("[fallback] %s: %s", item.title, item.message)
         return
 
     notification.notify(
@@ -88,11 +97,19 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_CONFIG_PATH,
         help="Path to the notification config JSON file.",
     )
-    parser.add_argument(
+
+    # FIX: replaced confusing --cycles 0 = infinite with an explicit --infinite flag
+    cycle_group = parser.add_mutually_exclusive_group()
+    cycle_group.add_argument(
         "--cycles",
         type=int,
         default=1,
-        help="Number of times to run through the notification list. Use 0 for infinite.",
+        help="Number of times to run through the notification list (default: 1).",
+    )
+    cycle_group.add_argument(
+        "--infinite",
+        action="store_true",
+        help="Run forever (overrides --cycles).",
     )
     return parser
 
@@ -104,20 +121,27 @@ def main() -> int:
         config_data = load_config(args.config)
         app_name, default_timeout, notifications = parse_notifications(config_data)
     except (OSError, ValueError) as exc:
-        print(f"Error: {exc}", file=sys.stderr)
+        # FIX: use logger.error instead of print to stderr
+        logger.error("Startup error: %s", exc)
         return 1
 
+    run_forever = args.infinite
     cycle_count = 0
+
+    logger.info("Starting %s. Cycles: %s", app_name, "infinite" if run_forever else args.cycles)
+
     while True:
         cycle_count += 1
         for item in notifications:
-            print(f"Sending notification: {item.title}")
+            # FIX: use logger.info instead of print
+            logger.info("Sending notification: %s", item.title)
             send_notification(app_name, item, default_timeout)
             time.sleep(item.interval_seconds)
 
-        if args.cycles and cycle_count >= args.cycles:
+        if not run_forever and cycle_count >= args.cycles:
             break
 
+    logger.info("Done.")
     return 0
 
 
