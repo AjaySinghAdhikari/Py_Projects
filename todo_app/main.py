@@ -21,8 +21,13 @@ def load_tasks() -> list[Task]:
     if not TASKS_FILE.exists():
         return []
 
-    with TASKS_FILE.open("r", encoding="utf-8") as task_file:
-        raw_tasks = json.load(task_file)
+    # FIX: wrap json.load in try/except — corrupted file used to crash the app
+    try:
+        with TASKS_FILE.open("r", encoding="utf-8") as task_file:
+            raw_tasks = json.load(task_file)
+    except json.JSONDecodeError:
+        print("Warning: tasks file is corrupted. Starting with an empty task list.")
+        return []
 
     tasks: list[Task] = []
     for item in raw_tasks:
@@ -46,15 +51,17 @@ def next_task_id(tasks: list[Task]) -> int:
     return max((task.id for task in tasks), default=0) + 1
 
 
-def list_tasks(tasks: list[Task]) -> None:
-    if not tasks:
-        print("No tasks yet.")
+def list_tasks(tasks: list[Task], only_open: bool = False) -> None:
+    filtered = [t for t in tasks if not t.completed] if only_open else tasks
+    if not filtered:
+        print("No tasks yet." if not only_open else "No open tasks.")
         return
 
-    print("\nTasks:")
-    for task in tasks:
+    label = "Open Tasks" if only_open else "All Tasks"
+    print(f"\n{label}:")
+    for task in filtered:
         status = "done" if task.completed else "open"
-        print(f"{task.id}. [{status}] {task.title}")
+        print(f"  {task.id}. [{status}] {task.title}")
 
 
 def add_task(tasks: list[Task]) -> None:
@@ -97,6 +104,33 @@ def mark_complete(tasks: list[Task]) -> None:
     print("Task ID not found.")
 
 
+# FIX: new feature — edit an existing task's title
+def edit_task(tasks: list[Task]) -> None:
+    if not tasks:
+        print("No tasks to edit.")
+        return
+
+    list_tasks(tasks)
+    try:
+        task_id = int(input("Enter task ID to edit: "))
+    except ValueError:
+        print("Please enter a valid number.")
+        return
+
+    for task in tasks:
+        if task.id == task_id:
+            new_title = input(f"New title (current: \"{task.title}\"): ").strip()
+            if not new_title:
+                print("Title cannot be empty. Edit cancelled.")
+                return
+            task.title = new_title
+            save_tasks(tasks)
+            print(f"Task updated to: {task.title}")
+            return
+
+    print("Task ID not found.")
+
+
 def delete_task(tasks: list[Task]) -> None:
     if not tasks:
         print("No tasks to delete.")
@@ -122,10 +156,12 @@ def delete_task(tasks: list[Task]) -> None:
 def show_menu() -> None:
     print("\nMenu:")
     print("1. Add a task")
-    print("2. List tasks")
-    print("3. Mark a task as complete")
-    print("4. Delete a task")
-    print("5. Quit")
+    print("2. List all tasks")
+    print("3. List open tasks only")   # FIX: new filter option
+    print("4. Mark a task as complete")
+    print("5. Edit a task")            # FIX: new edit option
+    print("6. Delete a task")
+    print("7. Quit")
 
 
 def main() -> None:
@@ -133,17 +169,21 @@ def main() -> None:
 
     while True:
         show_menu()
-        choice = input("Choose an option (1/2/3/4/5): ").strip()
+        choice = input("Choose an option (1-7): ").strip()
 
         if choice == "1":
             add_task(tasks)
         elif choice == "2":
             list_tasks(tasks)
         elif choice == "3":
-            mark_complete(tasks)
+            list_tasks(tasks, only_open=True)
         elif choice == "4":
-            delete_task(tasks)
+            mark_complete(tasks)
         elif choice == "5":
+            edit_task(tasks)
+        elif choice == "6":
+            delete_task(tasks)
+        elif choice == "7":
             print("Goodbye.")
             break
         else:
